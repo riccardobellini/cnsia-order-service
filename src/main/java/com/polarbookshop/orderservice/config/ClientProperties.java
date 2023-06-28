@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.net.URI;
 
 @ConfigurationProperties(prefix = "polar")
-public record ClientProperties(@NotNull URI catalogServiceUri) {
+public record ClientProperties(@NotNull URI catalogServiceUri,
+                               int catalogServiceTimeoutSecs) {
 }
 
