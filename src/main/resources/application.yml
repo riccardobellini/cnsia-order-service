@@ -1,4 +1,10 @@
 spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: password
+    connection-timeout: 5s
   application:
     name: order-service
   lifecycle:
@@ -13,6 +19,15 @@ spring:
       max-size: 10
   config.import: "optional:configserver:"
   cloud:
+    function:
+      definition: dispatchOrder
+    stream:
+      bindings:
+        dispatchOrder-in-0:
+          destination: order-dispatched
+          group: ${spring.application.name}
+        acceptOrder-out-0:
+          destination: order-accepted
     config:
       uri: http://localhost:8888
       request-connect-timeout: 5000
