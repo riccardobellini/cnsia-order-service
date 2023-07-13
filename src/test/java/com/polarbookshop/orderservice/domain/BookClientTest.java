@@ -1,53 +1,53 @@
 package com.polarbookshop.orderservice.domain;
 
+import com.polarbookshop.orderservice.config.ClientProperties;
 import com.polarbookshop.orderservice.dto.book.Book;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
 
-@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(initializers = ConfigDataApplicationContextInitializer.class)
+@EnableConfigurationProperties(ClientProperties.class)
 class BookClientTest {
 
-    private static MockWebServer mockWebServer;
+    private MockWebServer mockWebServer;
+    private BookClient bookClient;
 
-    @BeforeAll
-    static void setUp() throws IOException {
+    @BeforeEach
+    void setUp() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
+
+        final var webClient = WebClient.builder()
+                .baseUrl(mockWebServer.url("/").uri().toString())
+                .build();
+        this.bookClient = new BookClientImpl(webClient, properties);
     }
 
-    @AfterAll
-    static void tearDown() throws IOException {
+    @AfterEach
+    void tearDown() throws IOException {
         mockWebServer.shutdown();
     }
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        @Primary
-        public WebClient testWebClient() {
-            return WebClient.builder()
-                    .baseUrl(mockWebServer.url("/").uri().toString()).build();
-        }
-    }
-
     @Autowired
-    private BookClient bookClient;
+    private ClientProperties properties;
 
     @Test
     void whenBookExistsThenReturnBook() {
