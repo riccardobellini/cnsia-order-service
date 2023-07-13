@@ -35,3 +35,5 @@ spec:
               value: jdbc:postgresql://polar-postgres/polardb_order
             - name: SPRING_CLOUD_CONFIG_URI
               value: http://config-service
+            - name: SPRING_RABBITMQ_HOST
+              value: polar-rabbitmq
